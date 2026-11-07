@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Esenlik Satış</title>
+<style>
+:root{--navy:#132238;--blue:#2463eb;--bg:#f3f6fb;--green:#15803d;--red:#b91c1c}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:#172033}
+header{background:var(--navy);color:white;padding:18px 22px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+header h1{margin:0;font-size:24px}header small{opacity:.8}
+main{max-width:1200px;margin:auto;padding:18px}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.card,.panel{background:white;border-radius:12px;padding:16px;box-shadow:0 2px 10px #1020300c}
+.card span{display:block;color:#64748b;font-size:13px}.card strong{font-size:24px;display:block;margin-top:7px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+h2{font-size:18px;margin:0 0 14px}
+label{display:block;font-size:13px;color:#475569;margin:10px 0 5px}
+input,select,button{font:inherit;border-radius:8px;padding:10px;border:1px solid #cbd5e1;width:100%}
+button{background:var(--blue);color:white;border:0;cursor:pointer;font-weight:600}
+button.secondary{background:#e8eefc;color:#1e40af}button.danger{background:#fee2e2;color:#991b1b}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.actions{display:flex;gap:8px;margin-top:12px}.actions button{flex:1}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:9px 6px;border-bottom:1px solid #e5eaf1}th{color:#64748b;font-size:12px}
+.table-wrap{overflow:auto}.muted{color:#64748b;font-size:13px}.total{font-size:22px;font-weight:bold;text-align:right;margin:12px 0}
+.notice{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;padding:12px;border-radius:9px;margin:12px 0;font-size:13px}
+.badge{padding:3px 7px;border-radius:20px;background:#e0f2fe;color:#075985;font-size:12px}
+@media(max-width:800px){.cards{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}main{padding:10px}header{padding:14px}.card strong{font-size:20px}}
+</style>
+</head>
+<body>
+<header><div><h1>🧾 Esenlik Satış</h1><small>Dükkân satışları · Ürün ve stok takibi</small></div><span class="badge">İlk deneme sürümü</span></header>
+<main>
+<div class="notice"><b>Bilgi:</b> Bu ilk deneme sürümü bilgileri bu tarayıcıda saklar. Başka cihazlarla otomatik eşleşmez; Trendyol bağlantısı ve internet üzerinden ortak veri sistemi sonraki aşamada kurulacaktır. Gerçek verilerle kullanmadan önce yedek alın.</div>
+<section class="cards">
+<div class="card"><span>Ürün çeşidi</span><strong id="productCount">0</strong></div>
+<div class="card"><span>Stok adedi</span><strong id="stockCount">0</strong></div>
+<div class="card"><span>Bugünkü dükkân satışı</span><strong id="todaySales">₺0</strong></div>
+<div class="card"><span>Bugünkü tahmini brüt kâr</span><strong id="todayProfit">₺0</strong></div>
+</section>
+<div class="grid">
+<section class="panel">
+<h2>➕ Ürün ekle</h2>
+<form id="productForm">
+<label>Barkod (okuyucuyla okutabilirsiniz)</label><input id="barcode" placeholder="Barkod" autofocus>
+<label>Ürün adı</label><input id="name" required placeholder="Örn. Mutfak mandalı">
+<div class="row"><div><label>Alış fiyatı (₺)</label><input id="cost" type="number" min="0" step="0.01" required></div><div><label>Dükkân satış fiyatı (₺)</label><input id="price" type="number" min="0" step="0.01" required></div></div>
+<div class="row"><div><label>Başlangıç stok</label><input id="stock" type="number" min="0" step="1" required value="1"></div><div><label>Trendyol fiyatı (₺) (isteğe bağlı)</label><input id="tyPrice" type="number" min="0" step="0.01"></div></div>
+<button style="margin-top:12px">Ürünü kaydet</button>
+</form>
+</section>
+<section class="panel">
+<h2>🛒 Dükkân satış ekranı</h2>
+<label>Barkod okut / ürün ara</label><input id="scan" placeholder="Barkodu okutun veya ürün adı yazın">
+<div class="actions"><button id="addScan">Ürünü sepete ekle</button><button class="secondary" id="clearCart">Sepeti temizle</button></div>
+<div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>Ürün</th><th>Adet</th><th>Fiyat</th><th></th></tr></thead><tbody id="cartRows"></tbody></table></div>
+<div class="total">Toplam: <span id="cartTotal">₺0</span></div>
+<label>Ödeme yöntemi</label><select id="payment"><option>Nakit</option><option>Kredi kartı</option><option>Diğer</option></select>
+<button id="checkout">Satışı tamamla</button>
+</section>
+</div>
+<section class="panel" style="margin-top:16px">
+<h2>📦 Ürünler ve stok</h2><div class="table-wrap"><table><thead><tr><th>Barkod</th><th>Ürün</th><th>Alış</th><th>Dükkân fiyatı</th><th>Trendyol fiyatı</th><th>Stok</th><th></th></tr></thead><tbody id="productsRows"></tbody></table></div>
+</section>
+<section class="panel" style="margin-top:16px">
+<h2>📈 Son satışlar</h2><div class="table-wrap"><table><thead><tr><th>Tarih</th><th>Ürünler</th><th>Ödeme</th><th>Toplam</th><th>Brüt kâr*</th></tr></thead><tbody id="salesRows"></tbody></table></div><p class="muted">*Brüt kâr = satış tutarı − ürün alış maliyeti. Komisyon, kargo, vergi ve diğer giderler bu ilk sürümde düşülmez.</p>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let products=JSON.parse(localStorage.getItem('esenlik_products')||'[]');
+let sales=JSON.parse(localStorage.getItem('esenlik_sales')||'[]');
+let cart=[];
+const money=n=>'₺'+Number(n||0).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2});
+function save(){localStorage.setItem('esenlik_products',JSON.stringify(products));localStorage.setItem('esenlik_sales',JSON.stringify(sales));render();}
+function render(){
+ $('productCount').textContent=products.length;
+ $('stockCount').textContent=products.reduce((s,p)=>s+Number(p.stock),0);
+ const today=new Date().toLocaleDateString('tr-TR');
+ const ts=sales.filter(s=>new Date(s.date).toLocaleDateString('tr-TR')===today);
+ $('todaySales').textContent=money(ts.reduce((s,x)=>s+x.total,0));
+ $('todayProfit').textContent=money(ts.reduce((s,x)=>s+x.profit,0));
+ $('productsRows').innerHTML=products.map(p=>`<tr><td>${esc(p.barcode||'-')}</td><td>${esc(p.name)}</td><td>${money(p.cost)}</td><td>${money(p.price)}</td><td>${p.tyPrice?money(p.tyPrice):'-'}</td><td>${p.stock}</td><td><button class="danger" onclick="delProduct('${p.id}')">Sil</button></td></tr>`).join('');
+ $('salesRows').innerHTML=sales.slice().reverse().slice(0,30).map(s=>`<tr><td>${new Date(s.date).toLocaleString('tr-TR')}</td><td>${esc(s.items.map(i=>i.name+' ×'+i.qty).join(', '))}</td><td>${esc(s.payment)}</td><td>${money(s.total)}</td><td>${money(s.profit)}</td></tr>`).join('');
+ renderCart();
+}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+$('productForm').addEventListener('submit',e=>{e.preventDefault();let barcode=$('barcode').value.trim();if(barcode&&products.some(p=>p.barcode===barcode)){alert('Bu barkod zaten kayıtlı.');return;}
+products.push({id:Date.now().toString(),barcode,name:$('name').value.trim(),cost:+$('cost').value,price:+$('price').value,tyPrice:+$('tyPrice').value||0,stock:+$('stock').value});e.target.reset();$('stock').value=1;save();$('barcode').focus();});
+function delProduct(id){if(confirm('Ürün silinsin mi?')){products=products.filter(p=>p.id!==id);save();}}
+function addToCart(){let q=$('scan').value.trim();if(!q)return;let p=products.find(x=>x.barcode===q)||products.find(x=>x.name.toLowerCase().includes(q.toLowerCase()));if(!p){alert('Ürün bulunamadı. Önce ürün ekleyin.');return;}let item=cart.find(x=>x.id===p.id);if(item){if(item.qty>=p.stock){alert('Stok yeterli değil.');return;}item.qty++;}else{if(p.stock<1){alert('Bu ürün stokta yok.');return;}cart.push({...p,qty:1});} $('scan').value='';renderCart();}
+$('addScan').onclick=addToCart;$('scan').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addToCart();}});
+$('clearCart').onclick=()=>{cart=[];renderCart();};
+function renderCart(){$('cartRows').innerHTML=cart.map(i=>`<tr><td>${esc(i.name)}</td><td><button class="secondary" style="width:auto;padding:4px 8px" onclick="qty('${i.id}',-1)">−</button> ${i.qty} <button class="secondary" style="width:auto;padding:4px 8px" onclick="qty('${i.id}',1)">+</button></td><td>${money(i.price*i.qty)}</td><td><button class="danger" style="width:auto" onclick="removeCart('${i.id}')">×</button></td></tr>`).join('');$('cartTotal').textContent=money(cart.reduce((s,i)=>s+i.price*i.qty,0));}
+function qty(id,d){let i=cart.find(x=>x.id===id),p=products.find(x=>x.id===id);if(!i)return;if(d>0&&i.qty>=p.stock){alert('Stok yeterli değil');return;}i.qty+=d;if(i.qty<=0)cart=cart.filter(x=>x.id!==id);renderCart();}
+function removeCart(id){cart=cart.filter(x=>x.id!==id);renderCart();}
+$('checkout').onclick=()=>{if(!cart.length){alert('Sepet boş.');return;}for(let i of cart){let p=products.find(x=>x.id===i.id);if(!p||p.stock<i.qty){alert('Stok yetersiz: '+i.name);return;}}
+let total=cart.reduce((s,i)=>s+i.price*i.qty,0),profit=cart.reduce((s,i)=>s+(i.price-i.cost)*i.qty,0);
+cart.forEach(i=>{let p=products.find(x=>x.id===i.id);p.stock-=i.qty;});
+sales.push({date:new Date().toISOString(),items:cart.map(i=>({name:i.name,qty:i.qty,price:i.price,cost:i.cost})),payment:$('payment').value,total,profit});
+cart=[];save();alert('Satış kaydedildi.');};
+render();
+</script>
+</body></html>
